@@ -56,8 +56,7 @@ mkdir protocol_db
 wget -qnc https://genome-idx.s3.amazonaws.com/kraken/k2_standard_eupath_20201202.tar.gz
 tar xvfz k2_standard_eupath_20201202.tar.gz -C protocol_db
 
-kraken2 --db ~/protocol_db --report sample.k2report --report-minimizer-data --minimum-hit-groups 3 ~/
-~/sortmerna_output/out/aligned.fq > sample.kraken2
+kraken2 --db ~/protocol_db --report sample.k2report --report-minimizer-data --minimum-hit-groups 3 ~/sortmerna_output/out/aligned.fq > sample.kraken2
 
 # Fetch Bracken 
 
