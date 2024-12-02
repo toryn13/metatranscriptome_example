@@ -5,6 +5,7 @@ sudo apt-get install bowtie2
 sudo apt install build-essential
 sudo apt-get install seqtk 
 sudo apt-get install git
+sudo apt-get install kraken2
 sudo ln -s $(which python3) /usr/bin/python
 
 wget https://raw.githubusercontent.com/toryn13/metatranscriptome_example/refs/heads/main/SRR8291356_1_sub.fastq
