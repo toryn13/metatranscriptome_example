@@ -1,0 +1,76 @@
+# Install packages and setup, look out for the prompts
+sudo apt-get install -y openjdk-17-jdk
+sudo apt-get install unzip
+sudo apt-get install bowtie2
+sudo apt install build-essential
+sudo apt-get install seqtk 
+sudo ln -s $(which python3) /usr/bin/python
+
+wget https://raw.githubusercontent.com/toryn13/metatranscriptome_example/refs/heads/main/SRR8291356_1_sub.fastq
+
+
+# Fetch trimmomatic
+wget http://www.usadellab.org/cms/uploads/supplementary/Trimmomatic/Trimmomatic-0.39.zip
+unzip Trimmomatic-0.39.zip
+
+# Run trimmmomatic
+
+java -jar ~/Trimmomatic-0.39/trimmomatic-0.39.jar SE  -threads 4  SRR8291356_1_sub.fastq  ~/SRR8291356.fastq  ILLUMINACLIP:TruSeq3-SE:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36
+
+
+# Fetch the bowtie2 index for mm10
+
+wget https://genome-idx.s3.amazonaws.com/bt/mm10.zip
+unzip mm10.zip
+
+# bowtie2 
+
+bowtie2 -x mm10 -U SRR8291356.fastq --un unmapped.fastq -S mapped.sam 2> bowtie2_stats.txt
+
+
+# SortMeRNA
+
+#Database
+wget https://github.com/biocore/sortmerna/releases/download/v4.3.4/database.tar.gz
+tar -xvzf database.tar.gz
+
+# Installation 
+wget https://github.com/biocore/sortmerna/releases/download/v4.3.6/sortmerna-4.3.6-Linux.sh
+bash sortmerna-4.3.6-Linux.sh
+
+# press ctrl c and then y
+
+export PATH=$HOME/bin:$PATH
+
+wget https://raw.githubusercontent.com/toryn13/metatranscriptome_example/refs/heads/main/sort.sh
+chmod 777 sort.sh
+nohup ~/sort.sh
+
+#close window and look at cpu usage 
+
+# Kraken2
+
+mkdir protocol_db
+wget -qnc https://genome-idx.s3.amazonaws.com/kraken/k2_standard_eupath_20201202.tar.gz
+tar xvfz k2_standard_eupath_20201202.tar.gz -C protocol_db
+
+kraken2 --db ~/protocol_db --report sample.k2report --report-minimizer-data --minimum-hit-groups 3 ~/
+~/sortmerna_output/out/aligned.fq > sample.kraken2
+
+# Fetch Bracken 
+
+git clone https://github.com/jenniferlu717/Bracken.git
+cd ~/Bracken/src/
+make
+
+cd ~/Bracken/
+
+./bracken -d ~/protocol_db -i ~/sample.k2report -o sample.bracken -w sample.breport -r 100 -l S -t 10
+
+
+#Blast the results 
+seqtk seq -a other.fq > output.fasta
+seqtk seq -a aligned.fq > output.fasta
+
+#
+
