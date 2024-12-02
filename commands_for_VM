@@ -6,8 +6,8 @@ sudo apt install build-essential
 sudo apt-get install seqtk 
 sudo apt-get install git
 sudo apt-get install kraken2
-sudo ln -s $(which python3) /usr/bin/python
 
+#Fetch the file
 wget https://raw.githubusercontent.com/toryn13/metatranscriptome_example/refs/heads/main/SRR8291356_1_sub.fastq
 
 
@@ -65,6 +65,7 @@ cd ~/Bracken/src/
 make
 
 cd ~/Bracken/
+sudo ln -s $(which python3) /usr/bin/python
 
 ./bracken -d ~/protocol_db -i ~/sample.k2report -o sample.bracken -w sample.breport -r 100 -l S -t 10
 
