@@ -4,6 +4,7 @@ sudo apt-get install unzip
 sudo apt-get install bowtie2
 sudo apt install build-essential
 sudo apt-get install seqtk 
+sudo apt-get install git
 sudo ln -s $(which python3) /usr/bin/python
 
 wget https://raw.githubusercontent.com/toryn13/metatranscriptome_example/refs/heads/main/SRR8291356_1_sub.fastq
@@ -69,8 +70,10 @@ cd ~/Bracken/
 
 
 #Blast the results 
-seqtk seq -a other.fq > output.fasta
-seqtk seq -a aligned.fq > output.fasta
+seqtk seq -a other.fq > output1.fasta
+seqtk seq -a aligned.fq > output2.fasta
 
-#
+# to view the files 
+
+head output1.fasta
 
