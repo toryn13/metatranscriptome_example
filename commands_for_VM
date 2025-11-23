@@ -45,6 +45,10 @@ make
 cd ../../
 
 #Bracken run
-./Bracken/src/bracken -d k2db -i sample.k2report -o sample.bracken -l S
+sudo ln -s $(which python3) /usr/bin/python
+
+cd ~/Bracken
+./bracken -d ~/k2db -i ~/sample.k2report -o sample.bracken -l S
+
 
 
