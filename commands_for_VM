@@ -25,8 +25,8 @@ bowtie2 -x mm10 -U trimmed.fastq --un host_removed.fastq -S /dev/null 2> bowtie2
 # 5. Download MiniKraken2
 
 mkdir -p k2db
-wget https://genome-idx.s3.amazonaws.com/kraken/k2_standard_8gb_20220926.tar.gz
-tar -xvzf k2_standard_8gb_20220926.tar.gz -C k2db
+wget https://genome-idx.s3.amazonaws.com/kraken/k2_standard_08_GB_20251015.tar.gz
+tar -xvzf k2_standard_08_GB_20251015.tar.gz -C k2db
 
 
 #6. Classify reads with Kraken2
