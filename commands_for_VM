@@ -1,80 +1,50 @@
-# Install packages and setup, look out for the prompts
-sudo apt-get install -y openjdk-17-jdk
-sudo apt-get install unzip
-sudo apt-get install bowtie2
-sudo apt install build-essential
-sudo apt-get install seqtk 
-sudo apt-get install git
-sudo apt-get install kraken2
 
-#Fetch the file
+#1. Install required packages
+
+sudo apt-get update
+sudo apt-get install -y fastp bowtie2 kraken2 seqtk wget unzip git
+
+
+#2. Fetch example FASTQ
 wget https://raw.githubusercontent.com/toryn13/metatranscriptome_example/refs/heads/main/SRR8291356_1_sub.fastq
 
 
-# Fetch trimmomatic
-wget http://www.usadellab.org/cms/uploads/supplementary/Trimmomatic/Trimmomatic-0.39.zip
-unzip Trimmomatic-0.39.zip
+#3. Trim reads with fastp
 
-# Run trimmmomatic
-
-java -jar ~/Trimmomatic-0.39/trimmomatic-0.39.jar SE  -threads 4  SRR8291356_1_sub.fastq  ~/SRR8291356.fastq  ILLUMINACLIP:TruSeq3-SE:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36
+fastp -i SRR8291356_1_sub.fastq -o trimmed.fastq --thread 4
 
 
-# Fetch the bowtie2 index for mm10
-
+# 4. Remove host reads (mouse mm10)
 wget https://genome-idx.s3.amazonaws.com/bt/mm10.zip
 unzip mm10.zip
 
-# bowtie2 
+bowtie2 -x mm10 -U trimmed.fastq --un host_removed.fastq -S /dev/null 2> bowtie2_stats.txt
 
-bowtie2 -x mm10 -U SRR8291356.fastq --un unmapped.fastq -S mapped.sam 2> bowtie2_stats.txt
+# host_removed.fastq now contains non-mouse reads
+
+# 5. Download MiniKraken2
+
+mkdir -p k2db
+wget https://genome-idx.s3.amazonaws.com/kraken/k2_standard_8gb_20220926.tar.gz
+tar -xvzf k2_standard_8gb_20220926.tar.gz -C k2db
 
 
-# SortMeRNA
+#6. Classify reads with Kraken2
 
-#Database
-wget https://github.com/biocore/sortmerna/releases/download/v4.3.4/database.tar.gz
-tar -xvzf database.tar.gz
+kraken2 --db k2db \
+        --report sample.k2report \
+        --minimum-hit-groups 3 \
+        host_removed.fastq > sample.kraken2
 
-# Installation 
-wget https://github.com/biocore/sortmerna/releases/download/v4.3.6/sortmerna-4.3.6-Linux.sh
-bash sortmerna-4.3.6-Linux.sh
 
-# press ctrl c and then y
-
-export PATH=$HOME/bin:$PATH
-
-wget https://raw.githubusercontent.com/toryn13/metatranscriptome_example/refs/heads/main/sort.sh
-chmod 777 sort.sh
-nohup ~/sort.sh
-
-#close window and look at cpu usage 
-
-# Kraken2
-
-mkdir protocol_db
-wget -qnc https://genome-idx.s3.amazonaws.com/kraken/k2_standard_eupath_20201202.tar.gz
-tar xvfz k2_standard_eupath_20201202.tar.gz -C protocol_db
-
-kraken2 --db ~/protocol_db --report sample.k2report --report-minimizer-data --minimum-hit-groups 3 ~/sortmerna_output/out/aligned.fq > sample.kraken2
-
-# Fetch Bracken 
+#7. Summarize abundances with Bracken
 
 git clone https://github.com/jenniferlu717/Bracken.git
-cd ~/Bracken/src/
+cd Bracken/src/
 make
+cd ../../
 
-cd ~/Bracken/
-sudo ln -s $(which python3) /usr/bin/python
+#Bracken run
+./Bracken/src/bracken -d k2db -i sample.k2report -o sample.bracken -l S
 
-./bracken -d ~/protocol_db -i ~/sample.k2report -o sample.bracken -w sample.breport -r 100 -l S -t 10
-
-
-#Blast the results 
-seqtk seq -a other.fq > output1.fasta
-seqtk seq -a aligned.fq > output2.fasta
-
-# to view the files 
-
-head output1.fasta
 
