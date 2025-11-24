@@ -20,7 +20,8 @@ unzip mm10.zip
 
 bowtie2 -x mm10 -U trimmed.fastq --un host_removed.fastq -S /dev/null 2> bowtie2_stats.txt
 
-# host_removed.fastq now contains non-mouse reads
+
+#host_removed.fastq now contains non-mouse reads
 
 # 5. Download MiniKraken2
 
@@ -50,5 +51,18 @@ sudo ln -s $(which python3) /usr/bin/python
 cd ~/Bracken
 ./bracken -d ~/k2db -i ~/sample.k2report -o sample.bracken -l S
 
+#8. Classification of 16SrRNA reads by kraken2
+#Download the index
+#Make sure you are in the home folder
 
+cd
+wget https://genome-idx.s3.amazonaws.com/kraken/16S_Silva138_20200326.tgz
+
+#Decompress the folder 
+tar -xzf 16S_Silva138_20200326.tgz
+
+#Download the fasta file 
+https://raw.githubusercontent.com/toryn13/metatranscriptome_example/refs/heads/main/zotus_nochime.fasta
+
+kraken2 --db 16S_SILVA138_k2db --report 16S_report.txt ~/zotus_nochime.fasta > 16S_output.kraken
 
